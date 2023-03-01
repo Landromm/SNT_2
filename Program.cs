@@ -19,9 +19,9 @@ namespace SNT
         static string temp_Parity;
         static string temp_StopBits;
         static string temp_DataBits;
-        readonly static string check_hex = "AAAAAA0F6210D8";
-        readonly static string RTC_write_hex = "AAAAAA0362100000D4";
-        readonly static string RTC_read_hex = "AAAAAA046210D3";
+        readonly static string check_hex = "AAAAAA0F6210D8";    //Сообщение для инициализации обмена данными со счетчиком.
+        readonly static string RTC_write_hex = "AAAAAA0362100000D4";    //Сообщение для записи данных на страницу '0' в счетчике (128 байт).
+        readonly static string RTC_read_hex = "AAAAAA046210D3"; //Сообщение для чтения данных со счетчика.
 
         static CommunicationManager comm = new CommunicationManager();
 
@@ -54,7 +54,7 @@ namespace SNT
 
         }
 
-        #region Wait TimeOut
+        #region Wait TimeOut - реализация задержки.
         // Методы реализации задержки отображения без блокировки потока пользовательского интерфейса.
         public static void Wait(int interval)
         {
@@ -72,6 +72,7 @@ namespace SNT
         }
         #endregion
 
+        //Метод чтения параметров COM-порт из ini. файла
         static void ParamFromConfiguration_Load()
         {
             try

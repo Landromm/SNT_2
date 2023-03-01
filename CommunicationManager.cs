@@ -226,7 +226,6 @@ namespace SNT
         }
         #endregion
 
-
         #region comPort_DataReceived
         /// <summary>
         /// Метод, который будет вызываться, когда в буфере ожидают данные.
@@ -235,7 +234,6 @@ namespace SNT
         /// <param name="e"></param>
         void comPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-
             if (!comPort.BreakState)
             {
                 try
@@ -248,19 +246,19 @@ namespace SNT
                     foreach (var item in comBuffer)
                     {
                         _dataByteList.Add(Convert.ToString(item, 16).PadLeft(2, '0').ToUpper());
-
                     }
                     Console.WriteLine("Размер коллекции: " + _dataByteList.Count);
 
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Ошибка чтения с порта." + ex.Message);
+                    Console.WriteLine("Ошибка чтения с COM-порта." + ex.Message);
                 }
             }
             else
             {
                 string str = comPort.ReadExisting();
+                Console.WriteLine("Разрыв связи с COM-портом: " + str);
             }
 
         }
