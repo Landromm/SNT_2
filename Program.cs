@@ -46,7 +46,6 @@ namespace SNT
                 Console.WriteLine("\n");
             }
 
-
             int countReadData = 0;
             ParamFromConfiguration_Load();
             OpenComPort();
@@ -72,7 +71,6 @@ namespace SNT
             }            
 
             comm.ClosePort();
-
             Console.ReadLine();
         }
 
@@ -147,11 +145,20 @@ namespace SNT
             Wait(temp_Timeout);
 
             Console.WriteLine("-----------------------STOP----------------------");
-            
-            //foreach (var item in comm.DataByteList)
-            //{
-            //    Console.WriteLine(item);
-            //}
+        }
+
+        //Метод опроса счетчика - пакет данных 256 байт - RTC
+        static void WriteDataNV(string writePageMsg, string readDataMsg)
+        {
+            comm.WriteData(writePageMsg);  //Записи данных на страницу '0' в счетчике (128 байт).
+            Wait(250);
+
+            comm.Count = 0;
+            comm.DataByteList.Clear();
+            comm.WriteData(readDataMsg);   //Чтения данных со счетчика.
+            Wait(temp_Timeout);
+
+            Console.WriteLine("-----------------------STOP----------------------");
         }
 
         //Метод подсчета CRC - пакета данных 128 байт.
