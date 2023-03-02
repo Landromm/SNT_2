@@ -12,7 +12,7 @@ namespace SNT
 {
     internal class Program
     {
-        static int temp_Timeout = 500;
+        static int temp_Timeout = 1000;
         //--------------------------
         static string temp_PortName;
         static string temp_BaudRate;
@@ -21,38 +21,58 @@ namespace SNT
         static string temp_DataBits;
         readonly static string check_hex = "AAAAAA0F6210D8";    //Сообщение для инициализации обмена данными со счетчиком.
         readonly static string RTC_write_hex = "AAAAAA0362100000D4";    //Сообщение для записи данных на страницу '0' в счетчике (128 байт).
-        readonly static string RTC_read_hex = "AAAAAA046210D3"; //Сообщение для чтения данных со счетчика.
+        readonly static string read_hex = "AAAAAA046210D3"; //Сообщение для чтения данных со счетчика.
+        
+        readonly static string NV_write_hex = "AAAAAA036210004094";    //Сообщение для записи данных на страницу '0' в счетчике (128 байт).
+
+
+        static bool checkSumCRC = false;
 
         static CommunicationManager comm = new CommunicationManager();
+        static Data_RTC data_RTC = new Data_RTC();
+
 
 
         static void Main(string[] args)
         {
+
+            for (int i = 0; i < data_RTC.CountNumberCounter; i++)
+            {
+                Console.WriteLine("Отправляемые пакеты данных для счетчика #{0}:", data_RTC.NumbersCounters[i]);
+                Console.WriteLine(data_RTC.SendStartSessionHex[i] + " - сообщение инициализации обмена.");
+                Console.WriteLine(data_RTC.SendWritePage128Hex[i] + " - сообщение записи страницы 128 байт данных.");
+                Console.WriteLine(data_RTC.SendWritePage256Hex[i] + " - сообщение записи страницы 256 байт данных.");
+                Console.WriteLine(data_RTC.SendReadDataHex[i] + " - сообщение чтения данных со страницы.");
+                Console.WriteLine("\n");
+            }
+
+
             int countReadData = 0;
             ParamFromConfiguration_Load();
             OpenComPort();
 
-            comm.WriteData(check_hex);      //Инициализации обмена данными со счетчиком.
-            Wait(250);
-
-            WriteDataRTC();
-
-            bool checkSumCRC = CheckSumCRC(comm.DataByteList);
-            while (checkSumCRC || countReadData == 2)
+            for (int i = 0; i < data_RTC.CountNumberCounter; i++)
             {
-                if (!checkSumCRC)
+                comm.WriteData(data_RTC.SendStartSessionHex[i]);      //Инициализации обмена данными со счетчиком.
+                Wait(250);
+
+                do
                 {
-                    Console.WriteLine("Повторный запрос на чтение данных RTC");
-                    WriteDataRTC();
-                    checkSumCRC = CheckSumCRC(comm.DataByteList);
-                    countReadData++;
+                    WriteDataRTC(data_RTC.SendWritePage128Hex[i], data_RTC.SendReadDataHex[i]);
+                    if(comm.DataByteList.Count != 0)
+                        checkSumCRC = CheckSumCRC(comm.DataByteList);
+
+                    if (!checkSumCRC)
+                    {
+                        Console.WriteLine("Повторный запрос на чтение данных RTC");
+                        countReadData++;
+                    }
                 }
-            };
-            
-
-
+                while (!checkSumCRC && countReadData < 3);
+            }            
 
             comm.ClosePort();
+
             Console.ReadLine();
         }
 
@@ -116,15 +136,15 @@ namespace SNT
         }
 
         //Метод опроса счетчика - пакет данных 128 байт - RTC
-        static void WriteDataRTC()
+        static void WriteDataRTC(string writePageMsg, string readDataMsg)
         {
-            comm.WriteData(RTC_write_hex);  //Записи данных на страницу '0' в счетчике (128 байт).
+            comm.WriteData(writePageMsg);  //Записи данных на страницу '0' в счетчике (128 байт).
             Wait(250);
 
             comm.Count = 0;
             comm.DataByteList.Clear();
-            comm.WriteData(RTC_read_hex);   //Чтения данных со счетчика.
-            Wait(500);
+            comm.WriteData(readDataMsg);   //Чтения данных со счетчика.
+            Wait(temp_Timeout);
 
             Console.WriteLine("-----------------------STOP----------------------");
             
@@ -142,9 +162,13 @@ namespace SNT
             {
                 resultCRC ^= Convert.ToInt32(dataList[i], 16);
             }
-            resultCRC ^= 0x0F;
+            resultCRC ^= 0xA5;
 
-            return resultCRC == Convert.ToInt32(dataList.Last()) ? true : false;
+
+            Console.WriteLine(resultCRC);
+            Console.WriteLine(Convert.ToInt32(dataList.Last(), 16));
+
+            return resultCRC == Convert.ToInt32(dataList.Last(), 16) ? true : false;
         }
     }
 }

@@ -46,12 +46,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommunicationManager.cs" />
+    <Compile Include="Data_RTC.cs" />
     <Compile Include="IniFile.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\TextFile1.txt" />
     <None Include="App.config" />
     <Content Include="Resources\Config.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -241,13 +241,14 @@ namespace SNT
                     int bytes = comPort.BytesToRead;
                     byte[] comBuffer = new byte[bytes];
                     comPort.Read(comBuffer, 0, bytes);
-                    Console.WriteLine("{0} " + ByteToHex(comBuffer), count);
+                    //Console.WriteLine("{0} " + ByteToHex(comBuffer), count);
+                    Console.WriteLine(ByteToHex(comBuffer));
                     count += bytes;
                     foreach (var item in comBuffer)
                     {
                         _dataByteList.Add(Convert.ToString(item, 16).PadLeft(2, '0').ToUpper());
                     }
-                    Console.WriteLine("Размер коллекции: " + _dataByteList.Count);
+                    //Console.WriteLine("Размер коллекции: " + _dataByteList.Count);
 
                 }
                 catch (Exception ex)
@@ -285,7 +286,7 @@ namespace SNT
                         if (!(comPort.IsOpen == true))
                             comPort.Open();
                         byte[] newMsg = HexToByte(msg);
-                        Console.WriteLine("\n\n" + "ОТПРАВКА hex-сообщения счетчику: |" + msg);
+                        Console.WriteLine("\n" + "ОТПРАВКА hex-сообщения счетчику: |" + msg);
                         comPort.Write(newMsg, 0, newMsg.Length);
                     }
                     catch (FormatException ex)
