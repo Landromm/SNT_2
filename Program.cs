@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using SNT.DataControl;
 
 namespace SNT
 {
@@ -19,30 +20,27 @@ namespace SNT
         static string temp_Parity;
         static string temp_StopBits;
         static string temp_DataBits;
+
         readonly static string check_hex = "AAAAAA0F6210D8";    //Сообщение для инициализации обмена данными со счетчиком.
         readonly static string RTC_write_hex = "AAAAAA0362100000D4";    //Сообщение для записи данных на страницу '0' в счетчике (128 байт).
-        readonly static string read_hex = "AAAAAA046210D3"; //Сообщение для чтения данных со счетчика.
-        
+        readonly static string read_hex = "AAAAAA046210D3"; //Сообщение для чтения данных со счетчика.        
         readonly static string NV_write_hex = "AAAAAA036210004094";    //Сообщение для записи данных на страницу '0' в счетчике (128 байт).
-
 
         static bool checkSumCRC = false;
 
         static CommunicationManager comm = new CommunicationManager();
-        static Data_RTC data_RTC = new Data_RTC();
-
-
+        static SendMessage sendMsg = new SendMessage();
+        static Data_RTC data_RTC= new Data_RTC();
 
         static void Main(string[] args)
         {
-
-            for (int i = 0; i < data_RTC.CountNumberCounter; i++)
+            for (int i = 0; i < sendMsg.CountNumberCounter; i++)
             {
-                Console.WriteLine("Отправляемые пакеты данных для счетчика #{0}:", data_RTC.NumbersCounters[i]);
-                Console.WriteLine(data_RTC.SendStartSessionHex[i] + " - сообщение инициализации обмена.");
-                Console.WriteLine(data_RTC.SendWritePage128Hex[i] + " - сообщение записи страницы 128 байт данных.");
-                Console.WriteLine(data_RTC.SendWritePage256Hex[i] + " - сообщение записи страницы 256 байт данных.");
-                Console.WriteLine(data_RTC.SendReadDataHex[i] + " - сообщение чтения данных со страницы.");
+                Console.WriteLine("Отправляемые пакеты данных для счетчика #{0}:", sendMsg.NumbersCounters[i]);
+                Console.WriteLine(sendMsg.SendStartSessionHex[i] + " - сообщение инициализации обмена.");
+                Console.WriteLine(sendMsg.SendWritePage128Hex[i] + " - сообщение записи страницы 128 байт данных.");
+                Console.WriteLine(sendMsg.SendWritePage256Hex[i] + " - сообщение записи страницы 256 байт данных.");
+                Console.WriteLine(sendMsg.SendReadDataHex[i] + " - сообщение чтения данных со страницы.");
                 Console.WriteLine("\n");
             }
 
@@ -50,14 +48,14 @@ namespace SNT
             ParamFromConfiguration_Load();
             OpenComPort();
 
-            for (int i = 0; i < data_RTC.CountNumberCounter; i++)
+            for (int i = 0; i < sendMsg.CountNumberCounter; i++)
             {
-                comm.WriteData(data_RTC.SendStartSessionHex[i]);      //Инициализации обмена данными со счетчиком.
+                comm.WriteData(sendMsg.SendStartSessionHex[i]);      //Инициализации обмена данными со счетчиком.
                 Wait(250);
 
                 do
                 {
-                    WriteDataRTC(data_RTC.SendWritePage128Hex[i], data_RTC.SendReadDataHex[i]);
+                    WriteDataRTC(sendMsg.SendWritePage128Hex[i], sendMsg.SendReadDataHex[i]);
                     if(comm.DataByteList.Count != 0)
                         checkSumCRC = CheckSumCRC(comm.DataByteList);
 
@@ -71,6 +69,8 @@ namespace SNT
             }            
 
             comm.ClosePort();
+
+
             Console.ReadLine();
         }
 

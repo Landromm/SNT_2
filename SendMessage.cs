@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SNT
 {
-    class Data_RTC
+    class SendMessage
     {
         const string prefixSendhex = "AAAAAA";
 
@@ -50,7 +50,7 @@ namespace SNT
 
         IniFile INI = new IniFile(@ConfigurationManager.AppSettings["pathConfig"]);
 
-        public Data_RTC()
+        public SendMessage()
         {
             Initialization();
             InitializationHexString();
@@ -64,7 +64,7 @@ namespace SNT
             numbersCounters = counters;
             
 
-            for(int i = 0; i < counters.Length; i ++)
+            for(int i = 0; i < counters.Length; i++)
             {
                 if (counters[i].Length == 4)
                 {
@@ -82,6 +82,7 @@ namespace SNT
             sendWritePage128Hex = new string[countNumberCounter];
             sendWritePage256Hex = new string[countNumberCounter];
             sendReadDataHex = new string[countNumberCounter];
+
             for (int i = 0; i < numberCounters.Count; i++)
             {
                 string tempSendHex = CheckSumCRC(prefixSendhex + "0F" + numberCounters[i], 0x0F);
